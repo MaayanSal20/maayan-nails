@@ -1,0 +1,95 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const bcrypt_1 = __importDefault(require("bcrypt"));
+const drizzle_orm_1 = require("drizzle-orm");
+const db_1 = require("../db");
+const schema_1 = require("../db/schema");
+const router = (0, express_1.Router)();
+router.post('/register', async (req, res) => {
+    try {
+        const { name, phone, email, password } = req.body;
+        if (!name || !phone || !password) {
+            return res.status(400).json({ error: 'חסרים פרטים חובה' });
+        }
+        const existingUser = await db_1.db.select().from(schema_1.users).where((0, drizzle_orm_1.eq)(schema_1.users.phone, phone));
+        if (existingUser.length > 0) {
+            return res.status(400).json({ error: 'משתמש עם מספר טלפון זה כבר קיים' });
+        }
+        const hashedPassword = await bcrypt_1.default.hash(password, 10);
+        const [newUser] = await db_1.db
+            .insert(schema_1.users)
+            .values({ name, phone, email, password: hashedPassword })
+            .returning();
+        res.status(201).json({
+            id: newUser.id,
+            name: newUser.name,
+            phone: newUser.phone,
+            role: newUser.role,
+        });
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'שגיאת שרת' });
+    }
+});
+router.post('/login', async (req, res) => {
+    try {
+        const { phone, password } = req.body;
+        if (!phone || !password) {
+            return res.status(400).json({ error: 'חסרים פרטים' });
+        }
+        const foundUsers = await db_1.db.select().from(schema_1.users).where((0, drizzle_orm_1.eq)(schema_1.users.phone, phone));
+        const user = foundUsers[0];
+        if (!user) {
+            return res.status(401).json({ error: 'טלפון או סיסמה שגויים' });
+        }
+        const passwordMatch = await bcrypt_1.default.compare(password, user.password);
+        if (!passwordMatch) {
+            return res.status(401).json({ error: 'טלפון או סיסמה שגויים' });
+        }
+        res.json({
+            id: user.id,
+            name: user.name,
+            phone: user.phone,
+            role: user.role,
+        });
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'שגיאת שרת' });
+    }
+});
+router.patch('/users/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { name, email, phone } = req.body;
+        if (!name || !phone) {
+            return res.status(400).json({ error: 'חסרים פרטים חובה' });
+        }
+        const [updatedUser] = await db_1.db
+            .update(schema_1.users)
+            .set({ name, email, phone })
+            .where((0, drizzle_orm_1.eq)(schema_1.users.id, id))
+            .returning();
+        if (!updatedUser) {
+            return res.status(404).json({ error: 'משתמשת לא נמצאה' });
+        }
+        res.json({
+            id: updatedUser.id,
+            name: updatedUser.name,
+            phone: updatedUser.phone,
+        });
+    }
+    catch (error) {
+        if (error?.code === '23505') {
+            return res.status(400).json({ error: 'מספר הטלפון כבר בשימוש' });
+        }
+        console.error(error);
+        res.status(500).json({ error: 'שגיאת שרת' });
+    }
+});
+exports.default = router;
