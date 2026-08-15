@@ -1,6 +1,7 @@
 import { getVisitorId } from './utils/visitorId'
 
 const API_URL = import.meta.env.VITE_API_URL
+
 export async function registerUser(data: {
   name: string
   phone: string
