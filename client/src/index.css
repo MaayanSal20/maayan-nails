@@ -1,0 +1,12 @@
+@import "tailwindcss";
+
+@theme {
+  --color-blush: #FBEAF0;
+  --color-pink: #ED93B1;
+  --color-rose: #D4537E;
+  --color-wine: #72243E;
+  --color-cream: #F1EFE8;
+
+  --font-serif: "Playfair Display", serif;
+  --font-sans: "Assistant", sans-serif;
+}
