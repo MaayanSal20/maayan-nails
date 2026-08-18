@@ -11,72 +11,74 @@ function Header({ onOpenAuth }: Props) {
   const { user, logout } = useAuth()
 
   return (
-    <header className="bg-cream/90 backdrop-blur-sm fixed top-0 w-full z-50 border-b border-pink/30">
-      <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-        <h1 className="text-2xl font-serif text-wine">Maayan Nails</h1>
+    <>
+      <header className="bg-cream/90 backdrop-blur-sm fixed top-0 w-full z-50 border-b border-pink/30">
+        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+          <h1 className="text-2xl font-serif text-wine">Maayan Nails</h1>
 
-        <nav className="hidden md:flex gap-8 text-wine font-sans items-center">
-          <Link to="/#home" className="hover:text-rose transition-colors">בית</Link>
-          <Link to="/#services" className="hover:text-rose transition-colors">שירותים</Link>
-          <Link to="/#gallery" className="hover:text-rose transition-colors">גלריה</Link>
-          <Link to="/#contact" className="hover:text-rose transition-colors">צור קשר</Link>
-          {user && (
-            <Link to="/account" className="hover:text-rose transition-colors">
-              האזור האישי שלי
-            </Link>
-          )}
-          {user?.role === 'admin' && (
-            <Link to="/admin" className="hover:text-rose transition-colors">
-              ניהול
-            </Link>
+          <nav className="hidden md:flex gap-8 text-wine font-sans items-center">
+            <Link to="/#home" className="hover:text-rose transition-colors">בית</Link>
+            <Link to="/#services" className="hover:text-rose transition-colors">שירותים</Link>
+            <Link to="/#gallery" className="hover:text-rose transition-colors">גלריה</Link>
+            <Link to="/#contact" className="hover:text-rose transition-colors">צור קשר</Link>
+            {user && (
+              <Link to="/account" className="hover:text-rose transition-colors">
+                האזור האישי שלי
+              </Link>
+            )}
+            {user?.role === 'admin' && (
+              <Link to="/admin" className="hover:text-rose transition-colors">
+                ניהול
+              </Link>
+            )}
+          </nav>
 
-          )}
-        </nav>
-
-        <div className="hidden md:flex items-center gap-3">
-          {user ? (
-            <>
-              <span className="text-wine font-sans">שלום {user.name.split(' ')[0]}</span>
-              <button onClick={logout} className="text-rose text-sm underline font-sans">
-                התנתקי
+          <div className="hidden md:flex items-center gap-3">
+            {user ? (
+              <>
+                <span className="text-wine font-sans">שלום {user.name.split(' ')[0]}</span>
+                <button onClick={logout} className="text-rose text-sm underline font-sans">
+                  התנתקי
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={onOpenAuth}
+                className="border-2 border-rose text-wine px-5 py-2 rounded-full font-sans hover:bg-blush transition-colors"
+              >
+                התחברי
               </button>
-            </>
-          ) : (
-            <button
-              onClick={onOpenAuth}
-              className="border-2 border-rose text-wine px-5 py-2 rounded-full font-sans hover:bg-blush transition-colors"
+            )}
+
+            <Link
+              to="/booking"
+              className="bg-rose text-cream px-5 py-2 rounded-full font-sans hover:bg-wine transition-colors"
             >
-              התחברי
-            </button>
-          )}
+              קביעת תור
+            </Link>
+          </div>
 
-          <Link
-            to="/booking"
-            className="bg-rose text-cream px-5 py-2 rounded-full font-sans hover:bg-wine transition-colors"
+          <button
+            onClick={() => setIsOpen(true)}
+            className="md:hidden text-wine text-3xl"
+            aria-label="פתח תפריט"
           >
-            קביעת תור
-          </Link>
+            ☰
+          </button>
         </div>
-
-        <button
-          onClick={() => setIsOpen(true)}
-          className="md:hidden text-wine text-3xl"
-          aria-label="פתח תפריט"
-        >
-          ☰
-        </button>
-      </div>
+      </header>
 
       {isOpen && (
         <div
           onClick={() => setIsOpen(false)}
-          className="fixed inset-0 bg-black/40 md:hidden"
+          className="fixed inset-0 bg-black/40 z-[60] md:hidden"
         />
       )}
 
       <div
-        className={`fixed top-0 right-0 h-full w-64 bg-cream shadow-2xl z-[70] transform transition-transform duration-300 md:hidden ${isOpen ? 'translate-x-0' : 'translate-x-full'
-          }`}
+        className={`fixed top-0 right-0 h-full w-64 bg-cream shadow-2xl z-[70] transform transition-transform duration-300 md:hidden ${
+          isOpen ? 'translate-x-0' : 'translate-x-full'
+        }`}
       >
         <div className="flex justify-between items-center p-6 border-b border-pink/30">
           <span className="font-serif text-wine text-xl">תפריט</span>
@@ -114,7 +116,7 @@ function Header({ onOpenAuth }: Props) {
                 setIsOpen(false)
                 onOpenAuth()
               }}
-              className="fixed inset-0 bg-black/40 z-[60] md:hidden"
+              className="bg-rose text-cream px-5 py-2 rounded-full text-center"
             >
               התחברי
             </button>
@@ -129,7 +131,7 @@ function Header({ onOpenAuth }: Props) {
           </Link>
         </nav>
       </div>
-    </header>
+    </>
   )
 }
 
