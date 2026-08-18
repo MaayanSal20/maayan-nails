@@ -75,7 +75,7 @@ function Header({ onOpenAuth }: Props) {
       )}
 
       <div
-        className={`fixed top-0 right-0 h-full w-64 bg-cream shadow-lg transform transition-transform duration-300 md:hidden ${isOpen ? 'translate-x-0' : 'translate-x-full'
+        className={`fixed top-0 right-0 h-full w-64 bg-cream shadow-2xl z-[70] transform transition-transform duration-300 md:hidden ${isOpen ? 'translate-x-0' : 'translate-x-full'
           }`}
       >
         <div className="flex justify-between items-center p-6 border-b border-pink/30">
@@ -114,7 +114,7 @@ function Header({ onOpenAuth }: Props) {
                 setIsOpen(false)
                 onOpenAuth()
               }}
-              className="border-2 border-rose text-wine px-5 py-2 rounded-full text-center"
+              className="fixed inset-0 bg-black/40 z-[60] md:hidden"
             >
               התחברי
             </button>

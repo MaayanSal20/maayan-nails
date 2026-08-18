@@ -111,9 +111,20 @@ function AuthModal({ isOpen, onClose }: Props) {
             />
             הישארי מחוברת
           </label>
-
-          {error && <p className="text-rose text-sm text-center">{error}</p>}
-
+          {error && (
+            <div className="text-center">
+              <p className="text-rose text-sm">{error}</p>
+              {mode === 'login' && (
+                <button
+                  type="button"
+                  onClick={() => setMode('register')}
+                  className="text-wine/70 text-xs underline mt-1"
+                >
+                  עדיין אין לך חשבון? הירשמי כאן
+                </button>
+              )}
+            </div>
+          )}
           <button
             type="submit"
             disabled={loading}
