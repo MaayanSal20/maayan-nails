@@ -5,6 +5,7 @@ import { db } from '../db'
 import { users } from '../db/schema'
 import { createToken } from '../utils/jwt'
 import { requireAuth } from '../middleware/requireAdmin'
+import { isValidIsraeliPhone } from '../utils/validation'
 
 const router = Router()
 
@@ -14,6 +15,10 @@ router.post('/register', async (req, res) => {
 
     if (!name || !phone || !password) {
       return res.status(400).json({ error: 'חסרים פרטים חובה' })
+    }
+
+    if (!isValidIsraeliPhone(phone)) {
+      return res.status(400).json({ error: 'מספר טלפון לא תקין - יש להזין מספר ישראלי תקין (למשל 0501234567)' })
     }
 
     const existingUser = await db.select().from(users).where(eq(users.phone, phone))
@@ -90,6 +95,9 @@ router.patch('/users/:id', requireAuth, async (req, res) => {
 
     if (!name || !phone) {
       return res.status(400).json({ error: 'חסרים פרטים חובה' })
+    }
+    if (!isValidIsraeliPhone(phone)) {
+      return res.status(400).json({ error: 'מספר טלפון לא תקין' })
     }
 
     const [updatedUser] = await db

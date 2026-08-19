@@ -31,25 +31,31 @@ function AuthModal({ isOpen, onClose }: Props) {
   if (!isOpen) return null
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError('')
-    setLoading(true)
+  e.preventDefault()
+  setError('')
 
-    try {
-      if (mode === 'register') {
-        const user = await registerUser({ name, phone, password })
-        login(user, rememberMe)
-      } else {
-        const user = await loginUser({ phone, password })
-        login(user, rememberMe)
-      }
-      onClose()
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'שגיאה')
-    } finally {
-      setLoading(false)
-    }
+  const validPrefixes = ['050', '052', '053', '054', '055', '058']
+  if (phone.length !== 10 || !/^\d+$/.test(phone) || !validPrefixes.includes(phone.slice(0, 3))) {
+    setError('מספר טלפון לא תקין - יש להזין מספר ישראלי תקין (למשל 0501234567)')
+    return
   }
+
+  setLoading(true)
+  try {
+    if (mode === 'register') {
+      const user = await registerUser({ name, phone, password })
+      login(user, rememberMe)
+    } else {
+      const user = await loginUser({ phone, password })
+      login(user, rememberMe)
+    }
+    onClose()
+  } catch (err) {
+    setError(err instanceof Error ? err.message : 'שגיאה')
+  } finally {
+    setLoading(false)
+  }
+}
 
   return (
     <div
