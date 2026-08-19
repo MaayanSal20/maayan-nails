@@ -75,15 +75,18 @@ function BookingPage() {
   }
 
   if (success) {
-    return (
-      <section className="min-h-screen flex items-center justify-center pt-24 px-6 bg-blush">
-        <div className="text-center">
-          <h1 className="text-3xl font-serif text-wine mb-3">התור נקבע בהצלחה! 🎉</h1>
-          <p className="text-wine/70 font-sans">מעבירה אותך לדף הבית...</p>
-        </div>
-      </section>
-    )
-  }
+  return (
+    <section className="min-h-screen flex items-center justify-center pt-24 px-6 bg-blush">
+      <div className="text-center max-w-md">
+        <h1 className="text-3xl font-serif text-wine mb-3">הבקשה נשלחה!</h1>
+        <p className="text-wine/70 font-sans mb-4">
+          הבקשה שלך ממתינה לאישור מיוצרת הסטודיו. תקבלי הודעה כשהתור יאושר.
+        </p>
+        <p className="text-wine/50 font-sans text-sm">מעבירה אותך לדף הבית...</p>
+      </div>
+    </section>
+  )
+}
 
   return (
     <section className="min-h-screen pt-28 pb-16 px-6 bg-blush">

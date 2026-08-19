@@ -61,7 +61,20 @@ router.get('/appointments/available', async (req, res) => {
         })
       )
 
-    const availableSlots = WORKING_HOURS.filter((slot) => !bookedTimes.includes(slot))
+    const now = new Date()
+    const todayInIsrael = now.toLocaleDateString('en-CA', { timeZone: 'Asia/Jerusalem' })
+    const currentTimeInIsrael = now.toLocaleTimeString('he-IL', {
+      timeZone: 'Asia/Jerusalem',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    })
+
+    const availableSlots = WORKING_HOURS.filter((slot) => {
+      if (bookedTimes.includes(slot)) return false
+      if (date === todayInIsrael && slot <= currentTimeInIsrael) return false
+      return true
+    })
 
     res.json(availableSlots)
   } catch (error) {
