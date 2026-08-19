@@ -32,7 +32,7 @@ function AccountPage() {
     setName(user.name)
     setPhone(user.phone)
 
-    getUserAppointments(user.id)
+    getUserAppointments(user.id, user.token)
       .then(setAppointments)
       .finally(() => setLoadingAppointments(false))
   }, [user, navigate])
@@ -46,7 +46,7 @@ function AccountPage() {
     setSaving(true)
 
     try {
-      const updated = await updateUser(user.id, { name, phone })
+      const updated = await updateUser(user.id, user.token, { name, phone })
       login({ ...user, ...updated })
       setEditSuccess(true)
       setTimeout(() => setEditSuccess(false), 3000)

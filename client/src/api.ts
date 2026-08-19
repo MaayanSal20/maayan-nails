@@ -29,8 +29,10 @@ export async function loginUser(data: { phone: string; password: string }) {
   return result
 }
 
-export async function getUserAppointments(userId: string) {
-  const res = await fetch(`${API_URL}/appointments/user/${userId}`)
+export async function getUserAppointments(userId: string, token: string) {
+  const res = await fetch(`${API_URL}/appointments/user/${userId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  })
   const result = await res.json()
   if (!res.ok) throw new Error(result.error || 'שגיאה בשליפת תורים')
   return result
@@ -60,17 +62,20 @@ export async function createAppointment(data: {
   return result
 }
 
-export async function updateUser(userId: string, data: { name: string; phone: string; email?: string }) {
+export async function updateUser(
+  userId: string,
+  token: string,
+  data: { name: string; phone: string; email?: string }
+) {
   const res = await fetch(`${API_URL}/users/${userId}`, {
     method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
     body: JSON.stringify(data),
   })
   const result = await res.json()
   if (!res.ok) throw new Error(result.error || 'שגיאה בעדכון פרטים')
   return result
 }
-
 
 export async function trackPageView(path: string) {
   try {
@@ -84,18 +89,18 @@ export async function trackPageView(path: string) {
   }
 }
 
-export async function getAdminStats(userId: string) {
+export async function getAdminStats(token: string) {
   const res = await fetch(`${API_URL}/admin/stats`, {
-    headers: { 'x-user-id': userId },
+    headers: { Authorization: `Bearer ${token}` },
   })
   const result = await res.json()
   if (!res.ok) throw new Error(result.error || 'שגיאה')
   return result
 }
 
-export async function getAllAppointments(userId: string) {
+export async function getAllAppointments(token: string) {
   const res = await fetch(`${API_URL}/admin/appointments`, {
-    headers: { 'x-user-id': userId },
+    headers: { Authorization: `Bearer ${token}` },
   })
   const result = await res.json()
   if (!res.ok) throw new Error(result.error || 'שגיאה')
@@ -103,13 +108,13 @@ export async function getAllAppointments(userId: string) {
 }
 
 export async function updateAppointmentStatus(
-  userId: string,
+  token: string,
   appointmentId: string,
   status: string
 ) {
   const res = await fetch(`${API_URL}/admin/appointments/${appointmentId}`, {
     method: 'PATCH',
-    headers: { 'Content-Type': 'application/json', 'x-user-id': userId },
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
     body: JSON.stringify({ status }),
   })
   const result = await res.json()
@@ -124,9 +129,9 @@ export async function getServices() {
   return result
 }
 
-export async function getAllServicesAdmin(userId: string) {
+export async function getAllServicesAdmin(token: string) {
   const res = await fetch(`${API_URL}/admin/services`, {
-    headers: { 'x-user-id': userId },
+    headers: { Authorization: `Bearer ${token}` },
   })
   const result = await res.json()
   if (!res.ok) throw new Error(result.error || 'שגיאה')
@@ -134,12 +139,12 @@ export async function getAllServicesAdmin(userId: string) {
 }
 
 export async function createService(
-  userId: string,
+  token: string,
   data: { name: string; description?: string; price: string; salePrice?: string; saleNote?: string }
 ) {
   const res = await fetch(`${API_URL}/admin/services`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-user-id': userId },
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
     body: JSON.stringify(data),
   })
   const result = await res.json()
@@ -148,13 +153,13 @@ export async function createService(
 }
 
 export async function updateService(
-  userId: string,
+  token: string,
   id: string,
   data: { name: string; description?: string; price: string; salePrice?: string; saleNote?: string; active: string }
 ) {
   const res = await fetch(`${API_URL}/admin/services/${id}`, {
     method: 'PATCH',
-    headers: { 'Content-Type': 'application/json', 'x-user-id': userId },
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
     body: JSON.stringify(data),
   })
   const result = await res.json()
@@ -162,10 +167,10 @@ export async function updateService(
   return result
 }
 
-export async function deleteService(userId: string, id: string) {
+export async function deleteService(token: string, id: string) {
   const res = await fetch(`${API_URL}/admin/services/${id}`, {
     method: 'DELETE',
-    headers: { 'x-user-id': userId },
+    headers: { Authorization: `Bearer ${token}` },
   })
   const result = await res.json()
   if (!res.ok) throw new Error(result.error || 'שגיאה')

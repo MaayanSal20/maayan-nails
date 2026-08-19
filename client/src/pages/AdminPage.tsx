@@ -64,7 +64,7 @@ function AdminPage() {
       return
     }
 
-    Promise.all([getAdminStats(user.id), getAllAppointments(user.id), getAllServicesAdmin(user.id)])
+    Promise.all([getAdminStats(user.token), getAllAppointments(user.token), getAllServicesAdmin(user.token)])
       .then(([statsData, appointmentsData, servicesData]) => {
         setStats(statsData)
         setAppointments(appointmentsData)
@@ -77,7 +77,7 @@ function AdminPage() {
     if (!user) return
     setUpdatingId(id)
     try {
-      const updated = await updateAppointmentStatus(user.id, id, status)
+      const updated = await updateAppointmentStatus(user.token, id, status)
       setAppointments((prev) => prev.map((a) => (a.id === id ? updated : a)))
     } catch (err) {
       alert(err instanceof Error ? err.message : 'שגיאה')
@@ -92,14 +92,14 @@ function AdminPage() {
     if (!user) return
 
     if (editingService) {
-      const updated = await updateService(user.id, editingService.id, {
+      const updated = await updateService(user.token, editingService.id, {
         ...data,
         active: editingService.active,
       })
       setServices((prev) => prev.map((s) => (s.id === updated.id ? updated : s)))
       setEditingService(null)
     } else {
-      const created = await createService(user.id, data)
+      const created = await createService(user.token, data)
       setServices((prev) => [...prev, created])
       setIsAddingService(false)
     }
@@ -108,13 +108,13 @@ function AdminPage() {
   const handleDeleteService = async (id: string) => {
     if (!user) return
     if (!confirm('למחוק שירות זה?')) return
-    await deleteService(user.id, id)
+    await deleteService(user.token, id)
     setServices((prev) => prev.filter((s) => s.id !== id))
   }
 
   const handleToggleActive = async (s: Service) => {
     if (!user) return
-    const updated = await updateService(user.id, s.id, {
+    const updated = await updateService(user.token, s.id, {
       name: s.name,
       description: s.description || undefined,
       price: s.price,

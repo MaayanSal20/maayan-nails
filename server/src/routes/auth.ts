@@ -3,6 +3,8 @@ import bcrypt from 'bcrypt'
 import { eq } from 'drizzle-orm'
 import { db } from '../db'
 import { users } from '../db/schema'
+import { createToken } from '../utils/jwt'
+import { requireAuth } from '../middleware/requireAdmin'
 
 const router = Router()
 
@@ -26,11 +28,14 @@ router.post('/register', async (req, res) => {
       .values({ name, phone, email, password: hashedPassword })
       .returning()
 
+    const token = createToken({ id: newUser.id, role: newUser.role })
+
     res.status(201).json({
       id: newUser.id,
       name: newUser.name,
       phone: newUser.phone,
       role: newUser.role,
+      token,
     })
   } catch (error) {
     console.error(error)
@@ -58,11 +63,14 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'טלפון או סיסמה שגויים' })
     }
 
+    const token = createToken({ id: user.id, role: user.role })
+
     res.json({
       id: user.id,
       name: user.name,
       phone: user.phone,
       role: user.role,
+      token,
     })
   } catch (error) {
     console.error(error)
@@ -70,9 +78,14 @@ router.post('/login', async (req, res) => {
   }
 })
 
-router.patch('/users/:id', async (req, res) => {
+router.patch('/users/:id', requireAuth, async (req, res) => {
   try {
-    const { id } = req.params
+    const id = req.params.id as string
+
+    if (req.userId !== id) {
+      return res.status(403).json({ error: 'אין הרשאה' })
+    }
+
     const { name, email, phone } = req.body
 
     if (!name || !phone) {

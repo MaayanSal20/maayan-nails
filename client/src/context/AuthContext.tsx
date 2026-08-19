@@ -5,6 +5,7 @@ type User = {
   name: string
   phone: string
   role: string
+  token: string
 }
 
 type AuthContextType = {
