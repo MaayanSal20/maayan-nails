@@ -3,6 +3,7 @@ import { eq } from 'drizzle-orm'
 import { db } from '../db'
 import { appointments } from '../db/schema'
 import { requireAuth } from '../middleware/requireAdmin'
+import { notifications, users } from '../db/schema'
 
 const router = Router()
 
@@ -26,6 +27,15 @@ router.post('/appointments', async (req, res) => {
         userId: userId || null,
       })
       .returning()
+
+    const admins = await db.select().from(users).where(eq(users.role, 'admin'))
+
+    for (const admin of admins) {
+      await db.insert(notifications).values({
+        userId: admin.id,
+        message: `תור חדש ממתין לאישור: ${guestName} · ${service}`,
+      })
+    }
 
     res.status(201).json(newAppointment)
   } catch (error) {
