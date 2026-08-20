@@ -38,3 +38,11 @@ export const services = pgTable('services', {
   active: text('active').default('true').notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 })
+
+export const notifications = pgTable('notifications', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  userId: uuid('user_id').notNull().references(() => users.id),
+  message: text('message').notNull(),
+  read: text('read').default('false').notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+})

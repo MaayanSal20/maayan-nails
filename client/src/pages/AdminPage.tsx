@@ -211,48 +211,63 @@ function AdminPage() {
 
         {/* טבלת תורים */}
         <div className="bg-cream rounded-2xl p-6">
-          <h3 className="font-serif text-wine mb-4">ניהול תורים</h3>
+          <div className="flex items-center gap-3 mb-4">
+            <h3 className="font-serif text-wine">ניהול תורים</h3>
+            {appointments.filter((a) => a.status === 'pending').length > 0 && (
+              <span className="bg-pink-dark text-white text-xs px-3 py-1 rounded-full font-sans">
+                {appointments.filter((a) => a.status === 'pending').length} ממתינים לאישור
+              </span>
+            )}
+          </div>
           <div className="flex flex-col gap-3">
-            {appointments.map((a) => (
-              <div
-                key={a.id}
-                className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-blush rounded-xl p-4"
-              >
-                <div>
-                  <p className="font-sans text-wine font-semibold">
-                    {a.guestName} · {a.service}
-                  </p>
-                  <p className="font-sans text-wine/70 text-sm">
-                    {formatDate(a.date)} · {a.guestPhone}
-                  </p>
-                </div>
+            {[...appointments]
+              .sort((a, b) => {
+                if (a.status === 'pending' && b.status !== 'pending') return -1
+                if (a.status !== 'pending' && b.status === 'pending') return 1
+                return 0
+              })
+              .map((a) => (
+                <div
+                  key={a.id}
+                  className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl p-4 ${a.status === 'pending' ? 'bg-pink/10 ring-2 ring-pink' : 'bg-blush'
+                    }`}
+                >
+                  <div>
+                    <p className="font-sans text-wine font-semibold">
+                      {a.status === 'pending' && <span className="text-pink-dark">● </span>}
+                      {a.guestName} · {a.service}
+                    </p>
+                    <p className="font-sans text-wine/70 text-sm">
+                      {formatDate(a.date)} · {a.guestPhone}
+                    </p>
+                  </div>
 
-                <div className="flex items-center gap-2">
-                  <span className="text-xs bg-wine/10 text-wine px-3 py-1 rounded-full font-sans">
-                    {statusLabel[a.status] || a.status}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs bg-wine/10 text-wine px-3 py-1 rounded-full font-sans">
+                      {statusLabel[a.status] || a.status}
+                    </span>
 
-                  {a.status !== 'confirmed' && (
-                    <button
-                      onClick={() => handleStatusChange(a.id, 'confirmed')}
-                      disabled={updatingId === a.id}
-                      className="bg-rose text-cream px-3 py-1 rounded-full text-sm font-sans hover:bg-wine transition-colors disabled:opacity-50"
-                    >
-                      אישור
-                    </button>
-                  )}
-                  {a.status !== 'cancelled' && (
-                    <button
-                      onClick={() => handleStatusChange(a.id, 'cancelled')}
-                      disabled={updatingId === a.id}
-                      className="border border-rose text-wine px-3 py-1 rounded-full text-sm font-sans hover:bg-pink/20 transition-colors disabled:opacity-50"
-                    >
-                      ביטול
-                    </button>
-                  )}
+                    {a.status !== 'confirmed' && (
+                      <button
+                        onClick={() => handleStatusChange(a.id, 'confirmed')}
+                        disabled={updatingId === a.id}
+                        className="bg-pink text-white px-3 py-1 rounded-full text-sm font-sans hover:bg-pink-dark transition-colors disabled:opacity-50"
+                      >
+                        אישור
+                      </button>
+                    )}
+                    {a.status !== 'cancelled' && (
+                      <button
+                        onClick={() => handleStatusChange(a.id, 'cancelled')}
+                        disabled={updatingId === a.id}
+                        className="border border-pink text-wine px-3 py-1 rounded-full text-sm font-sans hover:bg-pink/20 transition-colors disabled:opacity-50"
+                      >
+                        ביטול
+                      </button>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
           </div>
         </div>
 

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import NotificationBell from './NotificationBell'
 
 type Props = {
   onOpenAuth: () => void
@@ -17,6 +18,7 @@ function Header({ onOpenAuth }: Props) {
           <h1 className="text-2xl font-serif text-wine">Maayan Nails</h1>
 
           <nav className="hidden md:flex gap-8 text-wine/80 font-sans items-center">
+            {user && <NotificationBell />}
             <Link to="/#home" className="hover:text-pink-dark transition-colors">בית</Link>
             <Link to="/#services" className="hover:text-pink-dark transition-colors">שירותים</Link>
             <Link to="/#gallery" className="hover:text-pink-dark transition-colors">גלריה</Link>

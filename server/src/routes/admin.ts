@@ -3,6 +3,7 @@ import { sql, eq, gte } from 'drizzle-orm'
 import { db } from '../db'
 import { users, appointments, pageViews } from '../db/schema'
 import { requireAdmin } from '../middleware/requireAdmin'
+import { notifications } from '../db/schema'
 
 const router = Router()
 
@@ -78,6 +79,14 @@ router.patch('/admin/appointments/:id', requireAdmin, async (req, res) => {
 
     if (!updated) {
       return res.status(404).json({ error: 'תור לא נמצא' })
+    }
+
+    if (updated.userId && (status === 'confirmed' || status === 'cancelled')) {
+      const statusText = status === 'confirmed' ? 'אושר' : 'בוטל'
+      await db.insert(notifications).values({
+        userId: updated.userId,
+        message: `התור שלך ל${updated.service} ${statusText}`,
+      })
     }
 
     res.json(updated)

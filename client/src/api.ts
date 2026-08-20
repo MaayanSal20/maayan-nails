@@ -176,3 +176,22 @@ export async function deleteService(token: string, id: string) {
   if (!res.ok) throw new Error(result.error || 'שגיאה')
   return result
 }
+
+export async function getNotifications(token: string) {
+  const res = await fetch(`${API_URL}/notifications`, {
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  const result = await res.json()
+  if (!res.ok) throw new Error(result.error || 'שגיאה')
+  return result
+}
+
+export async function markNotificationRead(token: string, id: string) {
+  const res = await fetch(`${API_URL}/notifications/${id}/read`, {
+    method: 'PATCH',
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  const result = await res.json()
+  if (!res.ok) throw new Error(result.error || 'שגיאה')
+  return result
+}
