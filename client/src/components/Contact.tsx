@@ -12,7 +12,7 @@ function Contact() {
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center w-full sm:w-auto">
           <a
-            href="https://wa.me/97255771992"
+            href="https://wa.me/972557721992"
             target="_blank"
             rel="noopener noreferrer"
             className="bg-rose text-cream px-8 py-3 rounded-full font-sans text-lg hover:bg-wine transition-colors"
