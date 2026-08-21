@@ -8,6 +8,7 @@ import BookingPage from './pages/BookingPage'
 import AccountPage from './pages/AccountPage'
 import { trackPageView } from './api'
 import AdminPage from './pages/AdminPage'
+import NotificationsPage from './pages/NotificationsPage'
 
 function App() {
   const [isAuthOpen, setIsAuthOpen] = useState(false)
@@ -26,6 +27,7 @@ function App() {
         <Route path="/booking" element={<BookingPage />} />
         <Route path="/account" element={<AccountPage />} />
         <Route path="/admin" element={<AdminPage />} />
+        <Route path="/notifications" element={<NotificationsPage />} />
       </Routes>
 
       <Footer />

@@ -60,13 +60,16 @@ function Header({ onOpenAuth }: Props) {
             </Link>
           </div>
 
-          <button
-            onClick={() => setIsOpen(true)}
-            className="md:hidden text-wine text-3xl"
-            aria-label="פתח תפריט"
-          >
-            ☰
-          </button>
+          <div className="md:hidden flex items-center gap-4">
+            {user && <NotificationBell />}
+            <button
+              onClick={() => setIsOpen(true)}
+              className="text-wine text-3xl"
+              aria-label="פתח תפריט"
+            >
+              ☰
+            </button>
+          </div>
         </div>
       </header>
 

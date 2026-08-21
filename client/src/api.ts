@@ -195,3 +195,13 @@ export async function markNotificationRead(token: string, id: string) {
   if (!res.ok) throw new Error(result.error || 'שגיאה')
   return result
 }
+
+export async function deleteNotification(token: string, id: string) {
+  const res = await fetch(`${API_URL}/notifications/${id}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  const result = await res.json()
+  if (!res.ok) throw new Error(result.error || 'שגיאה')
+  return result
+}
