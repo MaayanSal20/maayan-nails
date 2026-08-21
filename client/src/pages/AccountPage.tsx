@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getUserAppointments, updateUser } from '../api'
 import { useAuth } from '../context/AuthContext'
+import { requestCancelAppointment } from '../api'
 
 type Appointment = {
   id: string
@@ -79,6 +80,13 @@ function AccountPage() {
       hour: '2-digit',
       minute: '2-digit',
     })
+    const handleCancelRequest = async (id: string) => {
+  if (!user) return
+  await requestCancelAppointment(user.token, id)
+  setAppointments((prev) =>
+    prev.map((a) => (a.id === id ? { ...a, cancelRequested: 'true' } : a))
+  )
+}
 
   return (
     <section className="min-h-screen pt-28 pb-16 px-6 bg-blush">
@@ -142,9 +150,19 @@ function AccountPage() {
                           <p className="font-sans text-wine font-semibold">{a.service}</p>
                           <p className="font-sans text-wine/70 text-sm">{formatDate(a.date)}</p>
                         </div>
-                        <span className="text-xs bg-rose text-cream px-3 py-1 rounded-full font-sans">
-                          {statusLabel[a.status] || a.status}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs bg-rose text-cream px-3 py-1 rounded-full font-sans">
+                            {a.cancelRequested === 'true' ? 'ממתין לביטול' : statusLabel[a.status] || a.status}
+                          </span>
+                          {a.status !== 'cancelled' && a.cancelRequested !== 'true' && (
+                            <button
+                              onClick={() => handleCancelRequest(a.id)}
+                              className="text-xs border border-rose text-wine px-3 py-1 rounded-full font-sans hover:bg-cream transition-colors"
+                            >
+                              בקשת ביטול
+                            </button>
+                          )}
+                        </div>
                       </div>
                     ))}
                   </div>

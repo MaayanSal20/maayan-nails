@@ -28,6 +28,7 @@ type Appointment = {
   status: string
   guestName: string
   guestPhone: string
+  cancelRequested: string
 }
 
 type Service = {
@@ -246,6 +247,12 @@ function AdminPage() {
                     <span className="text-xs bg-wine/10 text-wine px-3 py-1 rounded-full font-sans">
                       {statusLabel[a.status] || a.status}
                     </span>
+
+                    {a.cancelRequested === 'true' && (
+                      <span className="text-xs bg-red-100 text-red-600 px-3 py-1 rounded-full font-sans">
+                        ⚠ בקשת ביטול
+                      </span>
+                    )}
 
                     {a.status !== 'confirmed' && (
                       <button

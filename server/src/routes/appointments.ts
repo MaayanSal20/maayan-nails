@@ -113,4 +113,39 @@ router.get('/appointments/user/:userId', requireAuth, async (req, res) => {
   }
 })
 
+router.patch('/appointments/:id/request-cancel', requireAuth, async (req, res) => {
+  try {
+    const id = req.params.id as string
+
+    const [appointment] = await db.select().from(appointments).where(eq(appointments.id, id))
+
+    if (!appointment) {
+      return res.status(404).json({ error: 'תור לא נמצא' })
+    }
+
+    if (appointment.userId !== req.userId) {
+      return res.status(403).json({ error: 'אין הרשאה' })
+    }
+
+    const [updated] = await db
+      .update(appointments)
+      .set({ cancelRequested: 'true' })
+      .where(eq(appointments.id, id))
+      .returning()
+
+    const admins = await db.select().from(users).where(eq(users.role, 'admin'))
+    for (const admin of admins) {
+      await db.insert(notifications).values({
+        userId: admin.id,
+        message: `בקשת ביטול תור: ${appointment.guestName} · ${appointment.service}`,
+      })
+    }
+
+    res.json(updated)
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ error: 'שגיאת שרת' })
+  }
+})
+
 export default router

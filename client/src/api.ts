@@ -205,3 +205,13 @@ export async function deleteNotification(token: string, id: string) {
   if (!res.ok) throw new Error(result.error || 'שגיאה')
   return result
 }
+
+export async function requestCancelAppointment(token: string, id: string) {
+  const res = await fetch(`${API_URL}/appointments/${id}/request-cancel`, {
+    method: 'PATCH',
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  const result = await res.json()
+  if (!res.ok) throw new Error(result.error || 'שגיאה')
+  return result
+}

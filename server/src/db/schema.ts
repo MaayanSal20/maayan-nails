@@ -18,6 +18,7 @@ export const appointments = pgTable('appointments', {
   guestName: text('guest_name').notNull(),
   guestPhone: text('guest_phone').notNull(),
   userId: uuid('user_id').references(() => users.id),
+  cancelRequested: text('cancel_requested').default('false').notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 })
 

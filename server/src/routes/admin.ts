@@ -73,7 +73,7 @@ router.patch('/admin/appointments/:id', requireAdmin, async (req, res) => {
 
     const [updated] = await db
       .update(appointments)
-      .set({ status })
+      .set({ status, cancelRequested: 'false' })
       .where(eq(appointments.id, id))
       .returning()
 
