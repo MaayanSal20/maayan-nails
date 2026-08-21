@@ -9,6 +9,7 @@ type Appointment = {
   service: string
   date: string
   status: string
+  cancelRequested: string
 }
 
 function AccountPage() {
