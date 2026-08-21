@@ -10,6 +10,7 @@ import {
 } from '../api'
 import { useAuth } from '../context/AuthContext'
 import ServiceForm from '../components/ServiceForm'
+import GalleryManager from '../components/GalleryManager'
 
 type Stats = {
   totalUsers: number
@@ -277,7 +278,6 @@ function AdminPage() {
               ))}
           </div>
         </div>
-
         {/* ניהול שירותים */}
         <div className="bg-cream rounded-2xl p-6">
           <div className="flex justify-between items-center mb-4">
@@ -356,6 +356,8 @@ function AdminPage() {
             )}
           </div>
         </div>
+
+        <GalleryManager />
       </div>
     </section>
   )

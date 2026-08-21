@@ -45,4 +45,26 @@ router.patch('/notifications/:id/read', requireAuth, async (req, res) => {
   }
 })
 
+router.delete('/notifications/:id', requireAuth, async (req, res) => {
+  try {
+    const id = req.params.id as string
+    const userId = req.userId!
+
+    const [deleted] = await db
+      .delete(notifications)
+      .where(and(eq(notifications.id, id), eq(notifications.userId, userId)))
+      .returning()
+
+    if (!deleted) {
+      return res.status(404).json({ error: 'התראה לא נמצאה' })
+    }
+
+    res.json({ success: true })
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ error: 'שגיאת שרת' })
+  }
+})
+
+
 export default router

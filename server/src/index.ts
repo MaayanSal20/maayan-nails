@@ -10,6 +10,7 @@ import adminRoutes from './routes/admin'
 import analyticsRoutes from './routes/analytics'
 import servicesRoutes from './routes/services'
 import notificationsRoutes from './routes/notifications'
+import galleryRoutes from './routes/gallery'
 
 const app = express()
 
@@ -26,6 +27,7 @@ app.use('/api', adminRoutes)
 app.use('/api', analyticsRoutes)
 app.use('/api', servicesRoutes)
 app.use('/api', notificationsRoutes)
+app.use('/api', galleryRoutes)
 
 const PORT = process.env.PORT || 5000
 

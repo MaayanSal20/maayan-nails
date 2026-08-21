@@ -44,6 +44,15 @@ export const notifications = pgTable('notifications', {
   id: uuid('id').defaultRandom().primaryKey(),
   userId: uuid('user_id').notNull().references(() => users.id),
   message: text('message').notNull(),
+  type: text('type').default('general').notNull(),
+  appointmentId: uuid('appointment_id'),
   read: text('read').default('false').notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+})
+
+export const galleryImages = pgTable('gallery_images', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  url: text('url').notNull(),
+  alt: text('alt'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 })

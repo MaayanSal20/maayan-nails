@@ -1,9 +1,8 @@
 import { Router } from 'express'
 import { eq } from 'drizzle-orm'
 import { db } from '../db'
-import { appointments } from '../db/schema'
+import { appointments, notifications, users } from '../db/schema'
 import { requireAuth } from '../middleware/requireAdmin'
-import { notifications, users } from '../db/schema'
 
 const router = Router()
 
@@ -34,6 +33,8 @@ router.post('/appointments', async (req, res) => {
       await db.insert(notifications).values({
         userId: admin.id,
         message: `תור חדש ממתין לאישור: ${guestName} · ${service}`,
+        type: 'new_appointment',
+        appointmentId: newAppointment.id,
       })
     }
 
@@ -138,6 +139,8 @@ router.patch('/appointments/:id/request-cancel', requireAuth, async (req, res) =
       await db.insert(notifications).values({
         userId: admin.id,
         message: `בקשת ביטול תור: ${appointment.guestName} · ${appointment.service}`,
+        type: 'cancel_request',
+        appointmentId: appointment.id,
       })
     }
 

@@ -215,3 +215,31 @@ export async function requestCancelAppointment(token: string, id: string) {
   if (!res.ok) throw new Error(result.error || 'שגיאה')
   return result
 }
+
+export async function getGalleryImages() {
+  const res = await fetch(`${API_URL}/gallery`)
+  const result = await res.json()
+  if (!res.ok) throw new Error(result.error || 'שגיאה')
+  return result
+}
+
+export async function addGalleryImage(token: string, data: { url: string; alt?: string }) {
+  const res = await fetch(`${API_URL}/admin/gallery`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify(data),
+  })
+  const result = await res.json()
+  if (!res.ok) throw new Error(result.error || 'שגיאה')
+  return result
+}
+
+export async function deleteGalleryImage(token: string, id: string) {
+  const res = await fetch(`${API_URL}/admin/gallery/${id}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  const result = await res.json()
+  if (!res.ok) throw new Error(result.error || 'שגיאה')
+  return result
+}

@@ -1,11 +1,13 @@
 import { useEffect, useState, useRef } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { getNotifications, markNotificationRead, deleteNotification } from '../api'
 import { useAuth } from '../context/AuthContext'
 
 type Notification = {
     id: string
     message: string
+    type: string
+    appointmentId: string | null
     read: string
     createdAt: string
 }
@@ -17,6 +19,7 @@ function NotificationBell() {
     const dropdownRef = useRef<HTMLDivElement>(null)
     const audioRef = useRef<HTMLAudioElement | null>(null)
     const prevCountRef = useRef<number>(0)
+    const navigate = useNavigate()
 
     const unreadCount = notifications.filter((n) => String(n.read) === 'false').length
 
@@ -69,6 +72,30 @@ function NotificationBell() {
         setNotifications((prev) => prev.filter((n) => n.id !== id))
     }
 
+    const handleNotificationClick = async (n: Notification) => {
+        await handleMarkRead(n.id)
+        setIsOpen(false)
+
+        if (n.type === 'appointment_confirmed' || n.type === 'appointment_cancelled') {
+            navigate('/account')
+        } else if (n.type === 'new_appointment' || n.type === 'cancel_request') {
+            navigate('/admin')
+        }
+    }
+
+    const handleBellClick = async () => {
+        const willOpen = !isOpen
+        setIsOpen(willOpen)
+
+        if (willOpen && user) {
+            const unread = notifications.filter((n) => String(n.read) === 'false')
+            for (const n of unread) {
+                await markNotificationRead(user.token, n.id)
+            }
+            setNotifications((prev) => prev.map((n) => ({ ...n, read: 'true' })))
+        }
+    }
+
     const formatDate = (dateStr: string) =>
         new Date(dateStr).toLocaleDateString('he-IL', {
             day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit',
@@ -78,7 +105,7 @@ function NotificationBell() {
 
     return (
         <div className="relative" ref={dropdownRef}>
-            <button onClick={() => setIsOpen((prev) => !prev)} className="relative text-wine p-1">
+            <button onClick={handleBellClick} className="relative text-wine p-1">
                 <svg
                     width="22"
                     height="22"
@@ -114,7 +141,7 @@ function NotificationBell() {
                                     className={`flex items-start justify-between gap-2 px-4 py-3 border-b border-blush last:border-0 hover:bg-blush transition-colors ${String(n.read) === 'false' ? 'bg-pink/5' : ''
                                         }`}
                                 >
-                                    <button onClick={() => handleMarkRead(n.id)} className="flex-1 text-right">
+                                    <button onClick={() => handleNotificationClick(n)} className="flex-1 text-right">
                                         <p className="text-wine font-sans text-sm">{n.message}</p>
                                         <p className="text-wine/40 font-sans text-xs mt-1">{formatDate(n.createdAt)}</p>
                                     </button>
