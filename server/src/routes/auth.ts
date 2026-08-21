@@ -91,21 +91,17 @@ router.patch('/users/:id', requireAuth, async (req, res) => {
       return res.status(403).json({ error: 'אין הרשאה' })
     }
 
-    const { name, email, phone } = req.body
+    const { name, email } = req.body
 
-    if (!name || !phone) {
+    if (!name) {
       return res.status(400).json({ error: 'חסרים פרטים חובה' })
-    }
-    if (!isValidIsraeliPhone(phone)) {
-      return res.status(400).json({ error: 'מספר טלפון לא תקין' })
     }
 
     const [updatedUser] = await db
       .update(users)
-      .set({ name, email, phone })
+      .set({ name, email })
       .where(eq(users.id, id))
       .returning()
-
     if (!updatedUser) {
       return res.status(404).json({ error: 'משתמשת לא נמצאה' })
     }

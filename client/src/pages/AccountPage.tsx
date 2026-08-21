@@ -48,7 +48,7 @@ function AccountPage() {
     setSaving(true)
 
     try {
-      const updated = await updateUser(user.id, user.token, { name, phone })
+      const updated = await updateUser(user.id, user.token, { name, phone: user.phone })
       login({ ...user, ...updated })
       setEditSuccess(true)
       setTimeout(() => setEditSuccess(false), 3000)
@@ -81,13 +81,13 @@ function AccountPage() {
       hour: '2-digit',
       minute: '2-digit',
     })
-    const handleCancelRequest = async (id: string) => {
-  if (!user) return
-  await requestCancelAppointment(user.token, id)
-  setAppointments((prev) =>
-    prev.map((a) => (a.id === id ? { ...a, cancelRequested: 'true' } : a))
-  )
-}
+  const handleCancelRequest = async (id: string) => {
+    if (!user) return
+    await requestCancelAppointment(user.token, id)
+    setAppointments((prev) =>
+      prev.map((a) => (a.id === id ? { ...a, cancelRequested: 'true' } : a))
+    )
+  }
 
   return (
     <section className="min-h-screen pt-28 pb-16 px-6 bg-blush">
@@ -114,10 +114,10 @@ function AccountPage() {
               <input
                 type="tel"
                 value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                className="w-full border border-pink/40 rounded-full px-4 py-2 font-sans focus:outline-none focus:border-rose"
-                required
+                disabled
+                className="w-full border border-wine/10 bg-wine/5 rounded-full px-4 py-2 font-sans text-wine/50 cursor-not-allowed"
               />
+              <p className="text-wine/40 font-sans text-xs mt-1">לא ניתן לשנות מספר טלפון</p>
             </div>
 
             {editError && <p className="text-rose text-sm text-center font-sans">{editError}</p>}

@@ -22,6 +22,8 @@ function BookingPage() {
   const [success, setSuccess] = useState(false)
   const [submitting, setSubmitting] = useState(false)
 
+  const [note, setNote] = useState('')
+
   useEffect(() => {
     setGuestName(user?.name || '')
     setGuestPhone(user?.phone || '')
@@ -63,6 +65,7 @@ function BookingPage() {
         date: `${date}T${time}:00`,
         guestName,
         guestPhone,
+        note: note || undefined,
         userId: user?.id,
       })
       setSuccess(true)
@@ -75,18 +78,18 @@ function BookingPage() {
   }
 
   if (success) {
-  return (
-    <section className="min-h-screen flex items-center justify-center pt-24 px-6 bg-blush">
-      <div className="text-center max-w-md">
-        <h1 className="text-3xl font-serif text-wine mb-3">הבקשה נשלחה!</h1>
-        <p className="text-wine/70 font-sans mb-4">
-          הבקשה שלך ממתינה לאישור מיוצרת הסטודיו. תקבלי הודעה כשהתור יאושר.
-        </p>
-        <p className="text-wine/50 font-sans text-sm">מעבירה אותך לדף הבית...</p>
-      </div>
-    </section>
-  )
-}
+    return (
+      <section className="min-h-screen flex items-center justify-center pt-24 px-6 bg-blush">
+        <div className="text-center max-w-md">
+          <h1 className="text-3xl font-serif text-wine mb-3">הבקשה נשלחה!</h1>
+          <p className="text-wine/70 font-sans mb-4">
+            הבקשה שלך ממתינה לאישור מיוצרת הסטודיו. תקבלי הודעה כשהתור יאושר.
+          </p>
+          <p className="text-wine/50 font-sans text-sm">מעבירה אותך לדף הבית...</p>
+        </div>
+      </section>
+    )
+  }
 
   return (
     <section className="min-h-screen pt-28 pb-16 px-6 bg-blush">
@@ -136,8 +139,8 @@ function BookingPage() {
                       type="button"
                       onClick={() => setTime(slot)}
                       className={`py-2 rounded-full font-sans text-sm transition-colors ${time === slot
-                          ? 'bg-rose text-cream'
-                          : 'bg-blush text-wine border border-pink/40 hover:bg-pink/30'
+                        ? 'bg-rose text-cream'
+                        : 'bg-blush text-wine border border-pink/40 hover:bg-pink/30'
                         }`}
                     >
                       {slot}
@@ -168,6 +171,17 @@ function BookingPage() {
               onChange={(e) => setGuestPhone(e.target.value)}
               className="w-full border border-pink/40 rounded-full px-4 py-2 font-sans focus:outline-none focus:border-rose"
               required
+            />
+          </div>
+
+          <div>
+            <label className="block text-wine font-sans text-sm mb-2">הערה (אופציונלי)</label>
+            <textarea
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              rows={3}
+              placeholder="למשל: אלרגיה מסוימת, בקשה מיוחדת..."
+              className="w-full border border-pink/40 rounded-2xl px-4 py-2 font-sans focus:outline-none focus:border-rose resize-none"
             />
           </div>
 

@@ -50,8 +50,9 @@ export async function createAppointment(data: {
   date: string
   guestName: string
   guestPhone: string
+  note?: string
   userId?: string
-}) {
+})  {
   const res = await fetch(`${API_URL}/appointments`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -79,6 +80,12 @@ export async function updateUser(
 
 export async function trackPageView(path: string) {
   try {
+    const today = new Date().toISOString().split('T')[0]
+    const trackedKey = `tracked_${today}_${path}`
+
+    if (sessionStorage.getItem(trackedKey)) return
+    sessionStorage.setItem(trackedKey, 'true')
+
     await fetch(`${API_URL}/analytics/pageview`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

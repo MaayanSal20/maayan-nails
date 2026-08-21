@@ -29,6 +29,7 @@ type Appointment = {
   status: string
   guestName: string
   guestPhone: string
+  note: string | null
   cancelRequested: string
 }
 
@@ -242,6 +243,11 @@ function AdminPage() {
                     <p className="font-sans text-wine/70 text-sm">
                       {formatDate(a.date)} · {a.guestPhone}
                     </p>
+                    {a.note && (
+                      <p className="font-sans text-wine/60 text-xs mt-1 bg-white/50 rounded-lg px-2 py-1 inline-block">
+                        📝 {a.note}
+                      </p>
+                    )}
                   </div>
 
                   <div className="flex items-center gap-2">

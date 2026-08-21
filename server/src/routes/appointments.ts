@@ -10,7 +10,7 @@ const WORKING_HOURS = ['09:00', '11:00', '13:00', '15:00', '17:00']
 
 router.post('/appointments', async (req, res) => {
   try {
-    const { service, date, guestName, guestPhone, userId } = req.body
+    const { service, date, guestName, guestPhone, note, userId } = req.body
 
     if (!service || !date || !guestName || !guestPhone) {
       return res.status(400).json({ error: 'חסרים פרטים חובה' })
@@ -23,6 +23,7 @@ router.post('/appointments', async (req, res) => {
         date: new Date(date),
         guestName,
         guestPhone,
+        note: note || null,
         userId: userId || null,
       })
       .returning()
