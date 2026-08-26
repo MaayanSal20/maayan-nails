@@ -250,3 +250,25 @@ export async function deleteGalleryImage(token: string, id: string) {
   if (!res.ok) throw new Error(result.error || 'שגיאה')
   return result
 }
+
+export async function forgotPassword(phone: string) {
+  const res = await fetch(`${API_URL}/forgot-password`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ phone }),
+  })
+  const result = await res.json()
+  if (!res.ok) throw new Error(result.error || 'שגיאה')
+  return result
+}
+
+export async function resetPassword(data: { phone: string; code: string; newPassword: string }) {
+  const res = await fetch(`${API_URL}/reset-password`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  })
+  const result = await res.json()
+  if (!res.ok) throw new Error(result.error || 'שגיאה')
+  return result
+}

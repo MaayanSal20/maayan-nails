@@ -6,6 +6,7 @@ import { users } from '../db/schema'
 import { createToken } from '../utils/jwt'
 import { requireAuth } from '../middleware/requireAdmin'
 import { isValidIsraeliPhone } from '../utils/validation'
+import { sendResetCodeEmail } from '../utils/email'
 
 const router = Router()
 
@@ -15,6 +16,10 @@ router.post('/register', async (req, res) => {
 
     if (!name || !phone || !password) {
       return res.status(400).json({ error: 'חסרים פרטים חובה' })
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ error: 'כתובת אימייל לא תקינה' })
     }
 
     if (!isValidIsraeliPhone(phone)) {
@@ -115,6 +120,73 @@ router.patch('/users/:id', requireAuth, async (req, res) => {
     if (error?.code === '23505') {
       return res.status(400).json({ error: 'מספר הטלפון כבר בשימוש' })
     }
+    console.error(error)
+    res.status(500).json({ error: 'שגיאת שרת' })
+  }
+})
+
+router.post('/forgot-password', async (req, res) => {
+  try {
+    const { phone } = req.body
+
+    if (!phone) {
+      return res.status(400).json({ error: 'חסר מספר טלפון' })
+    }
+
+    const foundUsers = await db.select().from(users).where(eq(users.phone, phone))
+    const user = foundUsers[0]
+
+    if (!user) {
+      return res.json({ success: true })
+    }
+
+    const resetCode = Math.floor(100000 + Math.random() * 900000).toString()
+    const resetCodeExpires = new Date(Date.now() + 15 * 60 * 1000)
+
+    await db
+      .update(users)
+      .set({ resetCode, resetCodeExpires })
+      .where(eq(users.id, user.id))
+
+    if (user.email) {
+      await sendResetCodeEmail(user.email, resetCode)
+    }
+
+    res.json({ success: true })
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ error: 'שגיאת שרת' })
+  }
+})
+
+router.post('/reset-password', async (req, res) => {
+  try {
+    const { phone, code, newPassword } = req.body
+
+    if (!phone || !code || !newPassword) {
+      return res.status(400).json({ error: 'חסרים פרטים' })
+    }
+
+    const foundUsers = await db.select().from(users).where(eq(users.phone, phone))
+    const user = foundUsers[0]
+
+    if (!user || user.resetCode !== code) {
+      return res.status(400).json({ error: 'קוד שגוי' })
+    }
+
+    if (!user.resetCodeExpires || new Date() > user.resetCodeExpires) {
+      return res.status(400).json({ error: 'הקוד פג תוקף, בקשי קוד חדש' })
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10)
+
+    await db
+      .update(users)
+      .set({ password: hashedPassword, resetCode: null, resetCodeExpires: null })
+      .where(eq(users.id, user.id))
+
+    res.json({ success: true })
+  } catch (error) {
     console.error(error)
     res.status(500).json({ error: 'שגיאת שרת' })
   }
