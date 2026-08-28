@@ -3,6 +3,7 @@ import { eq } from 'drizzle-orm'
 import { db } from '../db'
 import { appointments, notifications, users } from '../db/schema'
 import { requireAuth } from '../middleware/requireAdmin'
+import { isValidIsraeliPhone } from '../utils/validation'
 
 const router = Router()
 
@@ -16,6 +17,22 @@ router.post('/appointments', async (req, res) => {
       return res.status(400).json({ error: 'חסרים פרטים חובה' })
     }
 
+    if (!isValidIsraeliPhone(guestPhone)) {
+      return res.status(400).json({ error: 'מספר טלפון לא תקין - יש להזין מספר ישראלי תקין (למשל 0501234567)' })
+    }
+
+    if (userId) {
+      const foundUsers = await db.select().from(users).where(eq(users.id, userId))
+      const user = foundUsers[0]
+
+      if (!user) {
+        return res.status(404).json({ error: 'משתמשת לא נמצאה' })
+      }
+
+      if (user.emailVerified !== 'true') {
+        return res.status(403).json({ error: 'יש לאמת את כתובת האימייל שלך לפני קביעת תור' })
+      }
+    }
     const [newAppointment] = await db
       .insert(appointments)
       .values({

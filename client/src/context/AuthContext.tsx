@@ -6,6 +6,7 @@ type User = {
   phone: string
   role: string
   token: string
+  emailVerified: string
 }
 
 type AuthContextType = {

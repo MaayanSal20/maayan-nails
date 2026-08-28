@@ -9,6 +9,7 @@ import AccountPage from './pages/AccountPage'
 import AdminPage from './pages/AdminPage'
 import NotificationsPage from './pages/NotificationsPage'
 import { trackPageView } from './api'
+import VerifyEmailBanner from './components/VerifyEmailBanner'
 
 function App() {
   const [isAuthOpen, setIsAuthOpen] = useState(false)
@@ -24,6 +25,7 @@ function App() {
   return (
     <div className="min-h-screen bg-cream font-sans">
       <Header onOpenAuth={() => setIsAuthOpen(true)} />
+      <VerifyEmailBanner />
 
       <Routes>
         <Route path="/" element={<HomePage />} />

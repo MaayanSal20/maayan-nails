@@ -10,6 +10,7 @@ export const users = pgTable('users', {
   resetCode: text('reset_code'),
   resetCodeExpires: timestamp('reset_code_expires'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
+  emailVerified: text('email_verified').default('false').notNull(),
 })
 
 export const appointments = pgTable('appointments', {

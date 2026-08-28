@@ -99,6 +99,19 @@ function BookingPage() {
     )
   }
 
+  if (user && user.emailVerified !== 'true') {
+    return (
+      <section className="min-h-screen flex items-center justify-center pt-24 px-6 bg-blush">
+        <div className="text-center max-w-md">
+          <h1 className="text-2xl font-serif text-wine mb-3">נדרש אימות אימייל</h1>
+          <p className="text-wine/70 font-sans">
+            לפני קביעת תור, יש לאמת את כתובת האימייל שלך. בדקי את תיבת הדואר שלך, או השתמשי בפס העליון באתר לאימות.
+          </p>
+        </div>
+      </section>
+    )
+  }
+
   return (
     <section className="min-h-screen pt-28 pb-16 px-6 bg-blush">
       <div className="max-w-lg mx-auto">

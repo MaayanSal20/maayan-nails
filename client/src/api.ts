@@ -272,3 +272,26 @@ export async function resetPassword(data: { phone: string; code: string; newPass
   if (!res.ok) throw new Error(result.error || 'שגיאה')
   return result
 }
+
+export async function verifyEmail(token: string, code: string) {
+  const res = await fetch(`${API_URL}/verify-email`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ code }),
+  })
+  const result = await res.json()
+  if (!res.ok) throw new Error(result.error || 'שגיאה')
+  return result
+}
+
+export async function resendVerification(token: string) {
+  const res = await fetch(`${API_URL}/resend-verification`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  const result = await res.json()
+  if (!res.ok) throw new Error(result.error || 'שגיאה')
+  return result
+}
+
+

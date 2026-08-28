@@ -6,7 +6,8 @@ import { users } from '../db/schema'
 import { createToken } from '../utils/jwt'
 import { requireAuth } from '../middleware/requireAdmin'
 import { isValidIsraeliPhone } from '../utils/validation'
-import { sendResetCodeEmail } from '../utils/email'
+import { sendResetCodeEmail, sendVerificationEmail } from '../utils/email'
+
 
 const router = Router()
 
@@ -14,7 +15,7 @@ router.post('/register', async (req, res) => {
   try {
     const { name, phone, email, password } = req.body
 
-    if (!name || !phone || !password) {
+    if (!name || !phone || !password || !email) {
       return res.status(400).json({ error: 'חסרים פרטים חובה' })
     }
 
@@ -32,11 +33,21 @@ router.post('/register', async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10)
+    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString()
 
     const [newUser] = await db
       .insert(users)
-      .values({ name, phone, email, password: hashedPassword })
+      .values({
+        name,
+        phone,
+        email,
+        password: hashedPassword,
+        resetCode: verificationCode,
+        resetCodeExpires: new Date(Date.now() + 15 * 60 * 1000),
+      })
       .returning()
+
+    await sendVerificationEmail(email, verificationCode)
 
     const token = createToken({ id: newUser.id, role: newUser.role })
 
@@ -45,6 +56,7 @@ router.post('/register', async (req, res) => {
       name: newUser.name,
       phone: newUser.phone,
       role: newUser.role,
+      emailVerified: newUser.emailVerified,
       token,
     })
   } catch (error) {
@@ -184,6 +196,80 @@ router.post('/reset-password', async (req, res) => {
       .update(users)
       .set({ password: hashedPassword, resetCode: null, resetCodeExpires: null })
       .where(eq(users.id, user.id))
+
+    res.json({ success: true })
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ error: 'שגיאת שרת' })
+  }
+})
+
+router.post('/verify-email', requireAuth, async (req, res) => {
+  try {
+    const { code } = req.body
+    const userId = req.userId!
+
+    if (!code) {
+      return res.status(400).json({ error: 'חסר קוד אימות' })
+    }
+
+    const foundUsers = await db.select().from(users).where(eq(users.id, userId))
+    const user = foundUsers[0]
+
+    if (!user) {
+      return res.status(404).json({ error: 'משתמשת לא נמצאה' })
+    }
+
+    if (user.emailVerified === 'true') {
+      return res.json({ success: true, alreadyVerified: true })
+    }
+
+    if (user.resetCode !== code) {
+      return res.status(400).json({ error: 'קוד שגוי' })
+    }
+
+    if (!user.resetCodeExpires || new Date() > user.resetCodeExpires) {
+      return res.status(400).json({ error: 'הקוד פג תוקף, בקשי קוד חדש' })
+    }
+
+    await db
+      .update(users)
+      .set({ emailVerified: 'true', resetCode: null, resetCodeExpires: null })
+      .where(eq(users.id, userId))
+
+    res.json({ success: true })
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ error: 'שגיאת שרת' })
+  }
+})
+
+router.post('/resend-verification', requireAuth, async (req, res) => {
+  try {
+    const userId = req.userId!
+
+    const foundUsers = await db.select().from(users).where(eq(users.id, userId))
+    const user = foundUsers[0]
+
+    if (!user) {
+      return res.status(404).json({ error: 'משתמשת לא נמצאה' })
+    }
+
+    if (user.emailVerified === 'true') {
+      return res.json({ success: true, alreadyVerified: true })
+    }
+
+    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString()
+
+    await db
+      .update(users)
+      .set({
+        resetCode: verificationCode,
+        resetCodeExpires: new Date(Date.now() + 15 * 60 * 1000),
+      })
+      .where(eq(users.id, userId))
+
+    await sendVerificationEmail(user.email!, verificationCode)
 
     res.json({ success: true })
   } catch (error) {

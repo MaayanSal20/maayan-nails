@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getUserAppointments, updateUser } from '../api'
+import { getUserAppointments, updateUser, verifyEmail, resendVerification } from '../api'
 import { useAuth } from '../context/AuthContext'
 import { requestCancelAppointment } from '../api'
 
@@ -24,6 +24,11 @@ function AccountPage() {
   const [editError, setEditError] = useState('')
   const [editSuccess, setEditSuccess] = useState(false)
   const [saving, setSaving] = useState(false)
+
+  const [verifyCode, setVerifyCode] = useState('')
+  const [verifyError, setVerifyError] = useState('')
+  const [verifyLoading, setVerifyLoading] = useState(false)
+  const [resent, setResent] = useState(false)
 
   useEffect(() => {
     if (!user) {
@@ -59,6 +64,30 @@ function AccountPage() {
     }
   }
 
+  const handleVerifyEmail = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setVerifyError('')
+    setVerifyLoading(true)
+    try {
+      await verifyEmail(user.token, verifyCode)
+      login({ ...user, emailVerified: 'true' })
+    } catch (err) {
+      setVerifyError(err instanceof Error ? err.message : 'שגיאה')
+    } finally {
+      setVerifyLoading(false)
+    }
+  }
+
+  const handleResendVerification = async () => {
+    setVerifyError('')
+    try {
+      await resendVerification(user.token)
+      setResent(true)
+    } catch (err) {
+      setVerifyError(err instanceof Error ? err.message : 'שגיאה')
+    }
+  }
+
   const now = new Date()
   const upcoming = appointments
     .filter((a) => new Date(a.date) >= now)
@@ -78,7 +107,7 @@ function AccountPage() {
       timeZone: 'Asia/Jerusalem',
       day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit',
     })
-    
+
   const handleCancelRequest = async (id: string) => {
     if (!user) return
     await requestCancelAppointment(user.token, id)
@@ -130,6 +159,40 @@ function AccountPage() {
             </button>
           </form>
         </div>
+
+        {/* אימות אימייל */}
+        {user.emailVerified !== 'true' && (
+          <div className="bg-cream rounded-2xl p-6 ring-2 ring-pink">
+            <h2 className="text-xl font-serif text-wine mb-2">אימות אימייל</h2>
+            <p className="text-wine/70 font-sans text-sm mb-4">
+              כתובת האימייל שלך עדיין לא מאומתת. יש לאמת אותה כדי שתוכלי לקבוע תורים.
+            </p>
+            <form onSubmit={handleVerifyEmail} className="flex gap-2 mb-3">
+              <input
+                type="text"
+                placeholder="קוד אימות"
+                value={verifyCode}
+                onChange={(e) => setVerifyCode(e.target.value)}
+                className="flex-1 border border-pink/40 rounded-full px-4 py-2 font-sans text-center tracking-widest focus:outline-none focus:border-rose"
+                required
+              />
+              <button
+                type="submit"
+                disabled={verifyLoading}
+                className="bg-rose text-cream px-6 py-2 rounded-full font-sans hover:bg-wine transition-colors disabled:opacity-50"
+              >
+                {verifyLoading ? 'רגע...' : 'אימות'}
+              </button>
+            </form>
+            {verifyError && <p className="text-rose text-sm font-sans mb-2">{verifyError}</p>}
+            <button
+              onClick={handleResendVerification}
+              className="text-wine/60 text-sm underline"
+            >
+              {resent ? 'נשלח שוב ✓' : 'שליחת קוד חוזרת'}
+            </button>
+          </div>
+        )}
 
         {/* התורים */}
         <div className="bg-cream rounded-2xl p-6">
