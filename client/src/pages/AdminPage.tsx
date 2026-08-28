@@ -140,6 +140,22 @@ function AdminPage() {
     cancelled: 'בוטל',
   }
 
+  const buildWhatsAppLink = (a: Appointment) => {
+    const dateStr = formatDate(a.date)
+    let message = ''
+
+    if (a.status === 'confirmed') {
+      message = `שלום ${a.guestName}, כאן מעיין מ-Maayan Nails. התור שלך ל${a.service} בתאריך ${dateStr} אושר. נשמח לראותך.`
+    } else if (a.status === 'cancelled') {
+      message = `שלום ${a.guestName}, כאן מעיין מ-Maayan Nails. התור שלך ל${a.service} בתאריך ${dateStr} בוטל. ניתן לקבוע תור חדש דרך האתר.`
+    } else {
+      message = `שלום ${a.guestName}, כאן מעיין מ-Maayan Nails. קיבלנו את בקשתך לתור ${a.service} בתאריך ${dateStr}, נעדכן אותך בקרוב.`
+    }
+
+    const cleanPhone = a.guestPhone.replace(/^0/, '972')
+    return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`
+  }
+
   if (!user || user.role !== 'admin') return null
 
   if (loading) {
@@ -177,64 +193,81 @@ function AdminPage() {
     return d < now && d >= oneWeekAgo
   })
 
-  const renderAppointment = (a: Appointment, isPast: boolean) => (
-    <div
-      key={a.id}
-      className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl p-4 ${
-        isPast
+  const renderAppointment = (a: Appointment, isPast: boolean) => {
+    const isCancelled = a.status === 'cancelled'
+    const showStrikethrough = isPast || isCancelled
+
+    return (
+      <div
+        key={a.id}
+        className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl p-4 ${showStrikethrough
           ? 'bg-wine/5 opacity-60'
           : a.status === 'pending'
-          ? 'bg-pink/10 ring-2 ring-pink'
-          : 'bg-blush'
-      }`}
-    >
-      <div>
-        <p className={`font-sans text-wine font-semibold ${isPast ? 'line-through' : ''}`}>
-          {!isPast && a.status === 'pending' && <span className="text-pink-dark">● </span>}
-          {a.guestName} · {a.service}
-        </p>
-        <p className={`font-sans text-wine/70 text-sm ${isPast ? 'line-through' : ''}`}>
-          {formatDate(a.date)} · {a.guestPhone}
-        </p>
-        {a.note && (
-          <p className="font-sans text-wine/60 text-xs mt-1 bg-white/50 rounded-lg px-2 py-1 inline-block">
-            📝 {a.note}
+            ? 'bg-pink/10 ring-2 ring-pink'
+            : 'bg-blush'
+          }`}
+      >
+        <div>
+          <p className={`font-sans text-wine font-semibold ${showStrikethrough ? 'line-through' : ''}`}>
+            {!isPast && a.status === 'pending' && <span className="text-pink-dark">● </span>}
+            {a.guestName} · {a.service}
           </p>
-        )}
-      </div>
+          <p className={`font-sans text-wine/70 text-sm ${showStrikethrough ? 'line-through' : ''}`}>
+            {formatDate(a.date)} · {a.guestPhone}
+          </p>
+          {a.note && (
+            <p className="font-sans text-wine/60 text-xs mt-1 bg-white/50 rounded-lg px-2 py-1 inline-block">
+              📝 {a.note}
+            </p>
+          )}
+        </div>
 
-      <div className="flex items-center gap-2">
-        <span className="text-xs bg-wine/10 text-wine px-3 py-1 rounded-full font-sans">
-          {statusLabel[a.status] || a.status}
-        </span>
-
-        {a.cancelRequested === 'true' && (
-          <span className="text-xs bg-red-100 text-red-600 px-3 py-1 rounded-full font-sans">
-            ⚠ בקשת ביטול
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className={`text-xs px-3 py-1 rounded-full font-sans ${isCancelled ? 'bg-red-100 text-red-500' : 'bg-wine/10 text-wine'
+            }`}>
+            {statusLabel[a.status] || a.status}
           </span>
-        )}
 
-        {!isPast && a.status !== 'confirmed' && (
-          <button
-            onClick={() => handleStatusChange(a.id, 'confirmed')}
-            disabled={updatingId === a.id}
-            className="bg-pink text-white px-3 py-1 rounded-full text-sm font-sans hover:bg-pink-dark transition-colors disabled:opacity-50"
+          {a.cancelRequested === 'true' && !isCancelled && (
+            <span className="text-xs bg-red-100 text-red-600 px-3 py-1 rounded-full font-sans">
+              ⚠ בקשת ביטול
+            </span>
+          )}
+
+          <a
+            href={buildWhatsAppLink(a)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs bg-green-500 text-white px-3 py-1 rounded-full font-sans hover:bg-green-600 transition-colors flex items-center gap-1"
           >
-            אישור
-          </button>
-        )}
-        {!isPast && a.status !== 'cancelled' && (
-          <button
-            onClick={() => handleStatusChange(a.id, 'cancelled')}
-            disabled={updatingId === a.id}
-            className="border border-pink text-wine px-3 py-1 rounded-full text-sm font-sans hover:bg-pink/20 transition-colors disabled:opacity-50"
-          >
-            ביטול
-          </button>
-        )}
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.44.79 3.06 1.2 4.72 1.2h.02c5.46 0 9.91-4.45 9.91-9.91C21.95 6.45 17.5 2 12.04 2zm5.79 14.12c-.24.68-1.42 1.33-1.94 1.4-.5.07-1.12.1-1.81-.11-.42-.13-.96-.32-1.65-.62-2.91-1.26-4.81-4.18-4.95-4.38-.14-.19-1.18-1.57-1.18-3 0-1.43.75-2.13 1.02-2.42.27-.29.58-.36.78-.36.19 0 .39 0 .55.01.18.01.42-.07.65.5.24.58.82 2.01.89 2.15.07.14.11.31.02.5-.09.19-.14.31-.28.47-.14.16-.29.36-.42.48-.14.13-.28.28-.12.55.16.27.71 1.17 1.53 1.9 1.05.94 1.94 1.23 2.21 1.37.27.14.42.11.58-.07.16-.18.68-.79.86-1.06.18-.27.36-.22.6-.13.24.09 1.53.72 1.79.85.26.13.44.19.5.3.06.11.06.63-.18 1.31z" />
+            </svg>
+            שלח וואטסאפ
+          </a>
+
+          {!isPast && a.status !== 'confirmed' && (
+            <button
+              onClick={() => handleStatusChange(a.id, 'confirmed')}
+              disabled={updatingId === a.id}
+              className="bg-pink text-white px-3 py-1 rounded-full text-sm font-sans hover:bg-pink-dark transition-colors disabled:opacity-50"
+            >
+              אישור
+            </button>
+          )}
+          {!isPast && a.status !== 'cancelled' && (
+            <button
+              onClick={() => handleStatusChange(a.id, 'cancelled')}
+              disabled={updatingId === a.id}
+              className="border border-pink text-wine px-3 py-1 rounded-full text-sm font-sans hover:bg-pink/20 transition-colors disabled:opacity-50"
+            >
+              ביטול
+            </button>
+          )}
+        </div>
       </div>
-    </div>
-  )
+    )
+  }
 
   return (
     <section className="min-h-screen pt-28 pb-16 px-6 bg-blush">

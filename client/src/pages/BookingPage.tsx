@@ -58,6 +58,12 @@ function BookingPage() {
       return
     }
 
+    const validPrefixes = ['050', '052', '053', '054', '055', '058']
+    if (guestPhone.length !== 10 || !/^\d+$/.test(guestPhone) || !validPrefixes.includes(guestPhone.slice(0, 3))) {
+      setError('מספר טלפון לא תקין - יש להזין מספר ישראלי תקין (למשל 0501234567)')
+      return
+    }
+
     setSubmitting(true)
     try {
       const localDate = new Date(`${date}T${time}:00`)
