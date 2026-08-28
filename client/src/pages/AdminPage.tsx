@@ -130,6 +130,7 @@ function AdminPage() {
 
   const formatDate = (dateStr: string) =>
     new Date(dateStr).toLocaleDateString('he-IL', {
+      timeZone: 'Asia/Jerusalem',
       day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit',
     })
 
@@ -159,6 +160,81 @@ function AdminPage() {
       value,
     }))
     : []
+
+  const now = new Date()
+  const oneMonthAhead = new Date()
+  oneMonthAhead.setMonth(oneMonthAhead.getMonth() + 1)
+  const oneWeekAgo = new Date()
+  oneWeekAgo.setDate(oneWeekAgo.getDate() - 7)
+
+  const upcomingAppointments = appointments.filter((a) => {
+    const d = new Date(a.date)
+    return d >= now && d <= oneMonthAhead
+  })
+
+  const pastAppointments = appointments.filter((a) => {
+    const d = new Date(a.date)
+    return d < now && d >= oneWeekAgo
+  })
+
+  const renderAppointment = (a: Appointment, isPast: boolean) => (
+    <div
+      key={a.id}
+      className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl p-4 ${
+        isPast
+          ? 'bg-wine/5 opacity-60'
+          : a.status === 'pending'
+          ? 'bg-pink/10 ring-2 ring-pink'
+          : 'bg-blush'
+      }`}
+    >
+      <div>
+        <p className={`font-sans text-wine font-semibold ${isPast ? 'line-through' : ''}`}>
+          {!isPast && a.status === 'pending' && <span className="text-pink-dark">● </span>}
+          {a.guestName} · {a.service}
+        </p>
+        <p className={`font-sans text-wine/70 text-sm ${isPast ? 'line-through' : ''}`}>
+          {formatDate(a.date)} · {a.guestPhone}
+        </p>
+        {a.note && (
+          <p className="font-sans text-wine/60 text-xs mt-1 bg-white/50 rounded-lg px-2 py-1 inline-block">
+            📝 {a.note}
+          </p>
+        )}
+      </div>
+
+      <div className="flex items-center gap-2">
+        <span className="text-xs bg-wine/10 text-wine px-3 py-1 rounded-full font-sans">
+          {statusLabel[a.status] || a.status}
+        </span>
+
+        {a.cancelRequested === 'true' && (
+          <span className="text-xs bg-red-100 text-red-600 px-3 py-1 rounded-full font-sans">
+            ⚠ בקשת ביטול
+          </span>
+        )}
+
+        {!isPast && a.status !== 'confirmed' && (
+          <button
+            onClick={() => handleStatusChange(a.id, 'confirmed')}
+            disabled={updatingId === a.id}
+            className="bg-pink text-white px-3 py-1 rounded-full text-sm font-sans hover:bg-pink-dark transition-colors disabled:opacity-50"
+          >
+            אישור
+          </button>
+        )}
+        {!isPast && a.status !== 'cancelled' && (
+          <button
+            onClick={() => handleStatusChange(a.id, 'cancelled')}
+            disabled={updatingId === a.id}
+            className="border border-pink text-wine px-3 py-1 rounded-full text-sm font-sans hover:bg-pink/20 transition-colors disabled:opacity-50"
+          >
+            ביטול
+          </button>
+        )}
+      </div>
+    </div>
+  )
 
   return (
     <section className="min-h-screen pt-28 pb-16 px-6 bg-blush">
@@ -212,78 +288,48 @@ function AdminPage() {
           </div>
         </div>
 
-        {/* טבלת תורים */}
+        {/* תורים קרובים */}
         <div className="bg-cream rounded-2xl p-6">
           <div className="flex items-center gap-3 mb-4">
-            <h3 className="font-serif text-wine">ניהול תורים</h3>
-            {appointments.filter((a) => a.status === 'pending').length > 0 && (
+            <h3 className="font-serif text-wine">תורים קרובים</h3>
+            <span className="text-wine/40 text-xs font-sans">(חודש הקרוב)</span>
+            {upcomingAppointments.filter((a) => a.status === 'pending').length > 0 && (
               <span className="bg-pink-dark text-white text-xs px-3 py-1 rounded-full font-sans">
-                {appointments.filter((a) => a.status === 'pending').length} ממתינים לאישור
+                {upcomingAppointments.filter((a) => a.status === 'pending').length} ממתינים לאישור
               </span>
             )}
           </div>
           <div className="flex flex-col gap-3">
-            {[...appointments]
-              .sort((a, b) => {
-                if (a.status === 'pending' && b.status !== 'pending') return -1
-                if (a.status !== 'pending' && b.status === 'pending') return 1
-                return 0
-              })
-              .map((a) => (
-                <div
-                  key={a.id}
-                  className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl p-4 ${a.status === 'pending' ? 'bg-pink/10 ring-2 ring-pink' : 'bg-blush'
-                    }`}
-                >
-                  <div>
-                    <p className="font-sans text-wine font-semibold">
-                      {a.status === 'pending' && <span className="text-pink-dark">● </span>}
-                      {a.guestName} · {a.service}
-                    </p>
-                    <p className="font-sans text-wine/70 text-sm">
-                      {formatDate(a.date)} · {a.guestPhone}
-                    </p>
-                    {a.note && (
-                      <p className="font-sans text-wine/60 text-xs mt-1 bg-white/50 rounded-lg px-2 py-1 inline-block">
-                        📝 {a.note}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs bg-wine/10 text-wine px-3 py-1 rounded-full font-sans">
-                      {statusLabel[a.status] || a.status}
-                    </span>
-
-                    {a.cancelRequested === 'true' && (
-                      <span className="text-xs bg-red-100 text-red-600 px-3 py-1 rounded-full font-sans">
-                        ⚠ בקשת ביטול
-                      </span>
-                    )}
-
-                    {a.status !== 'confirmed' && (
-                      <button
-                        onClick={() => handleStatusChange(a.id, 'confirmed')}
-                        disabled={updatingId === a.id}
-                        className="bg-pink text-white px-3 py-1 rounded-full text-sm font-sans hover:bg-pink-dark transition-colors disabled:opacity-50"
-                      >
-                        אישור
-                      </button>
-                    )}
-                    {a.status !== 'cancelled' && (
-                      <button
-                        onClick={() => handleStatusChange(a.id, 'cancelled')}
-                        disabled={updatingId === a.id}
-                        className="border border-pink text-wine px-3 py-1 rounded-full text-sm font-sans hover:bg-pink/20 transition-colors disabled:opacity-50"
-                      >
-                        ביטול
-                      </button>
-                    )}
-                  </div>
-                </div>
-              ))}
+            {upcomingAppointments.length === 0 ? (
+              <p className="text-wine/50 font-sans text-sm text-center py-4">אין תורים קרובים</p>
+            ) : (
+              [...upcomingAppointments]
+                .sort((a, b) => {
+                  if (a.status === 'pending' && b.status !== 'pending') return -1
+                  if (a.status !== 'pending' && b.status === 'pending') return 1
+                  return new Date(a.date).getTime() - new Date(b.date).getTime()
+                })
+                .map((a) => renderAppointment(a, false))
+            )}
           </div>
         </div>
+
+        {/* תורים מהשבוע האחרון */}
+        <div className="bg-cream rounded-2xl p-6">
+          <h3 className="font-serif text-wine mb-4">
+            תורים מהשבוע האחרון <span className="text-wine/40 text-xs font-sans">(היסטוריה)</span>
+          </h3>
+          <div className="flex flex-col gap-3">
+            {pastAppointments.length === 0 ? (
+              <p className="text-wine/50 font-sans text-sm text-center py-4">אין תורים מהשבוע האחרון</p>
+            ) : (
+              [...pastAppointments]
+                .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                .map((a) => renderAppointment(a, true))
+            )}
+          </div>
+        </div>
+
         {/* ניהול שירותים */}
         <div className="bg-cream rounded-2xl p-6">
           <div className="flex justify-between items-center mb-4">

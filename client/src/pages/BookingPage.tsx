@@ -60,9 +60,11 @@ function BookingPage() {
 
     setSubmitting(true)
     try {
+      const localDate = new Date(`${date}T${time}:00`)
+
       await createAppointment({
         service,
-        date: `${date}T${time}:00`,
+        date: localDate.toISOString(),
         guestName,
         guestPhone,
         note: note || undefined,

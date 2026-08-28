@@ -75,12 +75,10 @@ function AccountPage() {
 
   const formatDate = (dateStr: string) =>
     new Date(dateStr).toLocaleDateString('he-IL', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+      timeZone: 'Asia/Jerusalem',
+      day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit',
     })
+    
   const handleCancelRequest = async (id: string) => {
     if (!user) return
     await requestCancelAppointment(user.token, id)
