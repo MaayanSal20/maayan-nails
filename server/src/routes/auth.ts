@@ -92,6 +92,7 @@ router.post('/login', async (req, res) => {
       name: user.name,
       phone: user.phone,
       role: user.role,
+      emailVerified: user.emailVerified,
       token,
     })
   } catch (error) {
